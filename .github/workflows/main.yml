@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        installer: [pip, "uv pip --system"]
+        installer: [pip, uv]
     name: ${{ matrix.os }}-${{ matrix.installer }}
     steps:
     - name: Checkout repository
@@ -21,7 +21,7 @@ jobs:
         python-version: '3.12'
         
     - name: Install uv
-      if: ${{ matrix.installer }} == "uv pip --system"
+      if: ${{ matrix.installer }} == "uv"
       uses: astral-sh/setup-uv@v3
       
     - name: Install Nuitka
@@ -31,7 +31,7 @@ jobs:
         
     - name: Install pyside6
       run: |
-        ${{ matrix.installer }} install pyside6
+        ${{ matrix.installer=="uv" && "uv pip install --system" || "pip install" }} pyside6
     
     - name: Compile main.py
       run: |
