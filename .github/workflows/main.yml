@@ -1,0 +1,42 @@
+name: Compile Python with Nuitka
+
+on:
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        pyside6-installer: [pip, "uv pip"]
+    name: ${{ matrix.os }}-${{pyside6-installer}}
+    steps:
+    - name: Checkout repository
+      uses: actionsdu -ah | sort -rh/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      if: ${{pyside6-installer}} == "uv pip"
+      uses: astral-sh/setup-uv@v3
+      
+    - name: Install Nuitka
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka
+        
+    - name: Install pyside6
+      run: |
+        ${{pyside6-installer}} install pyside6
+    
+    - name: Compile main.py
+      run: |
+        python -m nuitka main.py
+
+    - name: List compiled files
+      run: |
+        du -ah main.dist | sort -rh
